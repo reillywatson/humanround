@@ -10,29 +10,50 @@ import (
 type Unit string
 
 const Inch Unit = "inch"
-const Cm Unit = "cm"
-const Pound Unit = "pound"
-const Kg Unit = "kg"
-const Unknown Unit = "unknown"
+
+type opts struct {
+	unit Unit
+}
+
+type Option func(o *opts)
+
+func WithUnit(unit Unit) Option {
+	return func(o *opts) { o.unit = unit }
+}
 
 // Round rounds f to a more human-readable number. Its heuristics depend on the size of the number,
-// and the provided unit. It's intended for "human-scale" numbers, ie numbers that might plausibly be used to describe a human.
-func Round(f float64, unit Unit) float64 {
-	precision := 2 - int(math.Log10(f))
+// and the provided options. It's intended for "human-scale" numbers, ie numbers that might plausibly be used to describe a human.
+func Round(f float64, options ...Option) float64 {
+	o := &opts{}
+	for _, opt := range options {
+		opt(o)
+	}
+	var precision int
+	switch {
+	case f < 1:
+		precision = 3
+	case f < 10:
+		precision = 2
+	case f < 100:
+		precision = 1
+	default:
+		precision = int(2 - math.Log10(f))
+	}
 	// prefer "round" numbers if they're close enough
 	if precision < 2 && strings.HasSuffix(strconv.Itoa(int(math.Floor(f))), "0") {
-		return math.Floor(f)
+		f = math.Floor(f)
 	}
 	if precision < 2 && strings.HasSuffix(strconv.Itoa(int(math.Ceil(f))), "0") {
-		return math.Ceil(f)
+		f = math.Ceil(f)
 	}
-	if unit == Inch {
+	switch o.unit {
+	case Inch:
 		f = roundInches(f, precision)
 	}
 	return roundToPrecision(f, precision)
 }
 
-// inches are a non-decimal measurement, people like to think about them in halves, fourths, and eighths
+// inches are a non-decimal measurement: people like to think about them in halves, fourths, and eighths
 func roundInches(f float64, precision int) float64 {
 	floor := math.Floor(f)
 	if precision == 1 {

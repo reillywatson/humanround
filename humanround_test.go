@@ -5,7 +5,7 @@ import "testing"
 func TestRound(t *testing.T) {
 	tests := []struct {
 		in   float64
-		unit Unit
+		opts []Option
 		exp  float64
 	}{
 		{
@@ -14,19 +14,46 @@ func TestRound(t *testing.T) {
 		},
 		{
 			in:   2.26796,
-			unit: Inch,
+			opts: []Option{WithUnit(Inch)},
 			exp:  2.25,
+		},
+		{
+			in:   0.13,
+			opts: []Option{WithUnit(Inch)},
+			exp:  0.125,
+		},
+		{
+			in:   32.26796,
+			opts: []Option{WithUnit(Inch)},
+			exp:  32.5,
+		},
+		{
+			in:  2.26796,
+			exp: 2.27,
 		},
 		{
 			in:  453.592,
 			exp: 454,
 		},
+		{
+			in:  1022,
+			exp: 1020,
+		},
+		{
+			in:  5375,
+			exp: 5380,
+		},
+		{
+			in:  53750,
+			exp: 53800,
+		},
+		{
+			in:  55555,
+			exp: 55600,
+		},
 	}
 	for _, test := range tests {
-		if test.unit == "" {
-			test.unit = Unknown
-		}
-		got := Round(test.in, test.unit)
+		got := Round(test.in, test.opts...)
 		if got != test.exp {
 			t.Errorf("got %f, expected %f", got, test.exp)
 		}
