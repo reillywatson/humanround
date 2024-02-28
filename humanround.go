@@ -59,10 +59,7 @@ func roundInches(f float64, precision int) float64 {
 }
 
 func nearest(val float64, targets ...float64) float64 {
-	if len(targets) == 0 {
-		return val
-	}
-	res := targets[0]
+	res := val
 	diff := math.MaxFloat64
 	for _, t := range targets {
 		if d := math.Abs(val - t); d < diff {
