@@ -3,8 +3,6 @@ package humanround
 
 import (
 	"math"
-	"strconv"
-	"strings"
 )
 
 type Unit string
@@ -40,17 +38,16 @@ func Round(f float64, options ...Option) float64 {
 		precision = int(2 - math.Log10(f))
 	}
 	// prefer "round" numbers if they're close enough
-	if precision < 2 && strings.HasSuffix(strconv.Itoa(int(math.Floor(f))), "0") {
-		f = math.Floor(f)
-	}
-	if precision < 2 && strings.HasSuffix(strconv.Itoa(int(math.Ceil(f))), "0") {
-		f = math.Ceil(f)
+	if roundUpToPrecision(f, precision-2) == roundUpToPrecision(f, precision-1) {
+		f = roundUpToPrecision(f, precision-1)
+	} else if roundDownToPrecision(f, precision-2) == roundDownToPrecision(f, precision-1) {
+		f = roundDownToPrecision(f, precision-1)
 	}
 	switch o.unit {
 	case Inch:
 		f = roundInches(f, precision)
 	}
-	return roundToPrecision(f, precision)
+	return roundNearestToPrecision(f, precision)
 }
 
 // inches are a non-decimal measurement: people like to think about them in halves, fourths, and eighths
@@ -84,7 +81,16 @@ func nearest(val float64, targets ...float64) float64 {
 	return res
 }
 
-func roundToPrecision(f float64, places int) float64 {
+func roundNearestToPrecision(f float64, places int) float64 {
 	shift := math.Pow(10, float64(places))
 	return math.Floor(f*shift+.5) / shift
+}
+
+func roundDownToPrecision(f float64, places int) float64 {
+	shift := math.Pow(10, float64(places))
+	return math.Floor(f*shift) / shift
+}
+func roundUpToPrecision(f float64, places int) float64 {
+	shift := math.Pow(10, float64(places))
+	return math.Ceil(f*shift) / shift
 }
