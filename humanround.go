@@ -43,17 +43,18 @@ func Round(f float64, options ...Option) float64 {
 // inches are a non-decimal measurement: people like to think about them in halves, fourths, and eighths
 func roundInches(f float64, precision int) float64 {
 	floor := math.Floor(f)
-	if precision == 1 {
+	if precision <= 0 {
+		return f
+	}
+	switch precision {
+	case 1:
 		// round to half
 		return nearest(f, floor, floor+.5, floor+1)
-	}
-	if precision == 0 {
-		return nearest(f, floor, floor+1)
-	}
-	if precision == 2 {
+	case 2:
 		return nearest(f, floor, floor+.25, floor+.5, floor+.75, floor+1)
+	default:
+		return nearest(f, floor, floor+.125, floor+.25, floor+.375, floor+.5, floor+.625, floor+.75, floor+.875, floor+1)
 	}
-	return nearest(f, floor, floor+.125, floor+.25, floor+.375, floor+.5, floor+.625, floor+.75, floor+.875, floor+1)
 }
 
 func nearest(val float64, targets ...float64) float64 {
