@@ -26,17 +26,7 @@ func Round(f float64, options ...Option) float64 {
 	for _, opt := range options {
 		opt(o)
 	}
-	var precision int
-	switch {
-	case f < 1:
-		precision = 3
-	case f < 10:
-		precision = 2
-	case f < 100:
-		precision = 1
-	default:
-		precision = int(2 - math.Log10(f))
-	}
+	precision := 3 - int(math.Ceil(math.Log10(f)))
 	// prefer "round" numbers if they're close enough
 	if roundUpToPrecision(f, precision-2) == roundUpToPrecision(f, precision-1) {
 		f = roundUpToPrecision(f, precision-1)
