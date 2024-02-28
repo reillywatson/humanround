@@ -28,6 +28,11 @@ func TestRound(t *testing.T) {
 			exp:  32.5,
 		},
 		{
+			in:   0.001,
+			opts: []Option{WithUnit(Inch)},
+			exp:  0.001,
+		},
+		{
 			in:  2.26796,
 			exp: 2.27,
 		},
